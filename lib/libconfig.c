@@ -1586,8 +1586,17 @@ config_setting_t *config_setting_add(config_setting_t *parent,
       return(NULL);
   }
 
-  if(config_setting_get_member(parent, name) != NULL)
-    return(NULL); /* already exists */
+  config_setting_t *setting = config_setting_get_member(parent, name);
+  if (setting != NULL)
+  {
+    if ((setting->type != type && type != CONFIG_TYPE_NONE) ||
+        (setting->type != CONFIG_TYPE_GROUP &&
+         setting->type != CONFIG_TYPE_ARRAY &&
+         setting->type != CONFIG_TYPE_LIST))
+      return(NULL); /* already exists */
+    else
+      return setting; /* merge with existing config */
+  }
 
   return(config_setting_create(parent, name, type));
 }
